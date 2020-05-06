@@ -136,4 +136,86 @@ contract DeFiSafe {
     {
         //TODO swap Dai from uniswap
     }
+
+    //user withdraws asset
+    function withdrawAssets(address name,uint256 tokenType) 
+        public
+    {
+        require(tokenType >= 100 && tokenType <= 106, "not Token!");
+        //Match Route
+        TokenPool storage pool = matchRoute(tokenType);
+        //Out Token Pool
+        outTakenPool(pool,name,tokenType);
+    }
+
+    //out Token Pool
+    function outTakenPool(
+        TokenPool  pool,
+        address    name,
+        uint256    tokenType
+    ) internal {
+        //update Token Pool
+        User storage user = pool.users[name];
+        require(user.amount > 0,"No assets");
+        uint256 newTokenPrice = getTokenPrice(tokenType);
+        uint256 oldTokenPrice = user.price;
+        if(newTokenPrice >= oldTokenPrice){
+            //No loss
+            outUniswap(user.name,tokenType,user.amount*0.95);
+            profitInsurancePool(user.amount*0.05*oldTokenPrice);
+        }else{
+            //loss
+            uint256 lossMoney = user.amount*0.95*(oldTokenPrice-newTokenPrice);
+            outUniswap(user.name,tokenType,user.amount*0.95);
+            lossInsurancePool(user.name,amount*0.05*oldTokenPrice,lossMoney);
+        }
+        //Update ledger
+        pool.tokenAmount -= amount;
+        pool.userAmount -= 1;
+        user.amount = 0;
+        user.price = 0;
+    }
+
+    //out Uniswap
+    function outUniswap(address name,uint256 tokenType,uint256 amount)
+        internal
+    {
+         //TODO Take out the asset and return it to the user
+        
+    }
+
+    //Profit from settlement of insurance pool
+    function profitInsurancePool(uint256 deposit) internal {
+        insurePool.depositAmount -= deposit;
+        insurePool.surplusFundAmount += deposit;
+    }
+
+    //Loss on settlement of insurance pool
+    function lossInsurancePool(address name,uint256 deposit,uint256 loss) internal {
+        if(deposit>=loss){
+            uint256 surplusFund = deposit-loss;
+            insurePool.depositAmount -= deposit;
+            outAAVE(name,loss);
+            require(surplusFund>0);
+            insurePool.surplusFundAmount += surplusFund;
+        }else{
+            uint256 compensation = deposit;
+            insurePool.depositAmount -= deposit;
+            if (insurePool.surplusFundAmount > 0) {
+                compensation += insurePool.surplusFundAmount * (deposit/insurePool.depositAmount);
+                insurePool.surplusFundAmount -= nsurePool.surplusFundAmount * (deposit/insurePool.depositAmount);
+                if(compensation > loss){
+                    compensation = loss;
+                    insurePool.surplusFundAmount += (compensation-loss);
+                }
+            }
+            outAAVE(name,compensation);
+        }
+    }
+
+    //out AAVE,assets to users
+    function outAAVE(address name,uint256 amount) internal {
+        //TODO Take out the asset and return it to the user
+
+    }
 }
