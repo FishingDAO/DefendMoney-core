@@ -1,5 +1,5 @@
-const DeFiSafe = artifacts.require("DeFiSafe");
+const DefendMoney = artifacts.require("DefendMoney");
 
 module.exports = function(deployer) {
-  deployer.deploy(DeFiSafe);
+  deployer.deploy(DefendMoney);
 };
