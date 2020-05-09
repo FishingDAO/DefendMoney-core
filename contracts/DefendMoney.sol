@@ -1,5 +1,6 @@
 pragma solidity >=0.5.0 <0.7.0;
 
+import './Uniswap.sol';
 
 contract DeFiSafe {
     //User Structure
@@ -107,19 +108,33 @@ contract DeFiSafe {
         entryUniSwap(amount);
     }
 
-    //entry Uniswap
+    //Entry Uniswap
     function entryUniSwap(uint256 tokenType, uint256 amount) 
         internal 
     {
         //TODO add liquid
     }
 
-    //entry AAVE
+    //out Uniswap
+    function outUniswap(address name,uint256 tokenType,uint256 amount)
+        internal
+    {
+         //TODO Take out the asset and return it to the user
+        
+    }
+
+    //Entry AAVE
     function entryAAVE(uint256 amount) {
         //TODO add liquid
     }
 
-    // get Token price
+    //out AAVE,assets to users
+    function outAAVE(address name,uint256 amount) internal {
+        //TODO Take out the asset and return it to the user
+
+    }
+
+    // Eet Token price
     function getTokenPrice(uint256 tokenType) 
         public 
         returns (uint256) 
@@ -129,7 +144,7 @@ contract DeFiSafe {
         return price;
     }
 
-    // swap Dai from uniswap
+    // Swap Dai from uniswap
     function swapDai(uint256 tokenType, uint256 amount)
         public
         returns (uint256)
@@ -137,7 +152,7 @@ contract DeFiSafe {
         //TODO swap Dai from uniswap
     }
 
-    //user withdraws asset
+    //Withdraw asset
     function withdrawAssets(address name,uint256 tokenType) 
         public
     {
@@ -148,7 +163,7 @@ contract DeFiSafe {
         outTakenPool(pool,name,tokenType);
     }
 
-    //out Token Pool
+    //Out Token Pool
     function outTakenPool(
         TokenPool  pool,
         address    name,
@@ -176,22 +191,19 @@ contract DeFiSafe {
         user.price = 0;
     }
 
-    //out Uniswap
-    function outUniswap(address name,uint256 tokenType,uint256 amount)
-        internal
-    {
-         //TODO Take out the asset and return it to the user
-        
-    }
 
     //Profit from settlement of insurance pool
-    function profitInsurancePool(uint256 deposit) internal {
+    function profitInsurancePool(uint256 deposit) 
+        internal 
+    {
         insurePool.depositAmount -= deposit;
         insurePool.surplusFundAmount += deposit;
     }
 
     //Loss on settlement of insurance pool
-    function lossInsurancePool(address name,uint256 deposit,uint256 loss) internal {
+    function lossInsurancePool(address name,uint256 deposit,uint256 loss) 
+        internal 
+    {
         if(deposit>=loss){
             uint256 surplusFund = deposit-loss;
             insurePool.depositAmount -= deposit;
@@ -213,9 +225,4 @@ contract DeFiSafe {
         }
     }
 
-    //out AAVE,assets to users
-    function outAAVE(address name,uint256 amount) internal {
-        //TODO Take out the asset and return it to the user
-
-    }
 }
