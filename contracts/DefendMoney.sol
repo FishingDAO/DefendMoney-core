@@ -2,7 +2,7 @@ pragma solidity >=0.5.0 <0.7.0;
 
 import './Uniswap.sol';
 
-contract DeFiSafe {
+contract DefendMoney {
     //User Structure
     struct User {
         address name;
@@ -74,14 +74,14 @@ contract DeFiSafe {
     // Match Route
     function matchRoute(uint256 tokenType) 
         internal 
-        returns (TokenPool memory) 
+        returns (TokenPool storage) 
     {
         return tokenPools[tokenType];
     }
 
     // Entry Token Pool
     function entryTokenPool(
-        TokenPool pool,
+        TokenPool storage pool,
         address name,
         uint256 tokenType,
         uint256 amount
@@ -95,8 +95,8 @@ contract DeFiSafe {
         user.amount = amount;
         user.price = getTokenPrice(tokenType);
         // distribute Token
-        entryInsurancePool(swapDai(tokenType, amount * 0.05));
-        entryUniSwap(tokenType, amount * 0.95);
+        entryInsurancePool(swapDai(tokenType, amount*1));
+        entryUniSwap(tokenType, amount * 1);
     }
 
 
@@ -105,7 +105,7 @@ contract DeFiSafe {
         internal 
     {
         insurePool.depositAmount += amount;
-        entryUniSwap(amount);
+        entryUniSwap(100+7,amount);
     }
 
     //Entry Uniswap
@@ -115,16 +115,8 @@ contract DeFiSafe {
         //TODO add liquid
     }
 
-    //out Uniswap
-    function outUniswap(address name,uint256 tokenType,uint256 amount)
-        internal
-    {
-         //TODO Take out the asset and return it to the user
-        
-    }
-
-    //Entry AAVE
-    function entryAAVE(uint256 amount) {
+    //entry AAVE
+    function entryAAVE(uint256 amount) internal{
         //TODO add liquid
     }
 
@@ -139,7 +131,7 @@ contract DeFiSafe {
         public 
         returns (uint256) 
     {
-        uint256 price=10
+        uint256 price=10;
         // TODO get token price from Chainlink
         return price;
     }
@@ -150,6 +142,7 @@ contract DeFiSafe {
         returns (uint256)
     {
         //TODO swap Dai from uniswap
+        return 10;
     }
 
     //Withdraw asset
@@ -165,7 +158,7 @@ contract DeFiSafe {
 
     //Out Token Pool
     function outTakenPool(
-        TokenPool  pool,
+        TokenPool storage pool,
         address    name,
         uint256    tokenType
     ) internal {
@@ -176,16 +169,17 @@ contract DeFiSafe {
         uint256 oldTokenPrice = user.price;
         if(newTokenPrice >= oldTokenPrice){
             //No loss
-            outUniswap(user.name,tokenType,user.amount*0.95);
-            profitInsurancePool(user.amount*0.05*oldTokenPrice);
+            outUniswap(user.name,tokenType,user.amount*1);
+            profitInsurancePool(user.amount*1*oldTokenPrice);
         }else{
             //loss
-            uint256 lossMoney = user.amount*0.95*(oldTokenPrice-newTokenPrice);
-            outUniswap(user.name,tokenType,user.amount*0.95);
-            lossInsurancePool(user.name,amount*0.05*oldTokenPrice,lossMoney);
+            uint256 lossMoney = user.amount*1*(oldTokenPrice-newTokenPrice);
+            outUniswap(user.name,tokenType,user.amount*1);
+            var result = 
+            lossInsurancePool(user.name,user.amount*1*oldTokenPrice,lossMoney);
         }
         //Update ledger
-        pool.tokenAmount -= amount;
+        pool.tokenAmount -= user.amount;
         pool.userAmount -= 1;
         user.amount = 0;
         user.price = 0;
@@ -214,8 +208,9 @@ contract DeFiSafe {
             uint256 compensation = deposit;
             insurePool.depositAmount -= deposit;
             if (insurePool.surplusFundAmount > 0) {
+                //Existing problems: how to express the scale?
                 compensation += insurePool.surplusFundAmount * (deposit/insurePool.depositAmount);
-                insurePool.surplusFundAmount -= nsurePool.surplusFundAmount * (deposit/insurePool.depositAmount);
+                insurePool.surplusFundAmount -= insurePool.surplusFundAmount * (deposit/insurePool.depositAmount);
                 if(compensation > loss){
                     compensation = loss;
                     insurePool.surplusFundAmount += (compensation-loss);
