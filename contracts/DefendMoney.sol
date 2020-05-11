@@ -1,5 +1,5 @@
 pragma solidity >=0.5.0 <0.7.0;
-
+import "./ABDKMathQuad.sol";
 import './Uniswap.sol';
 
 contract DefendMoney {
@@ -95,8 +95,8 @@ contract DefendMoney {
         user.amount = amount;
         user.price = getTokenPrice(tokenType);
         // distribute Token
-        entryInsurancePool(swapDai(tokenType, amount*1));
-        entryUniSwap(tokenType, amount * 1);
+        entryInsurancePool(swapDai(tokenType, mulDiv(amount,5,100)));
+        entryUniSwap(tokenType,mulDiv(amount,95,100));
     }
 
 
@@ -169,14 +169,13 @@ contract DefendMoney {
         uint256 oldTokenPrice = user.price;
         if(newTokenPrice >= oldTokenPrice){
             //No loss
-            outUniswap(user.name,tokenType,user.amount*1);
-            profitInsurancePool(user.amount*1*oldTokenPrice);
+            outUniswap(user.name,tokenType,mulDiv(user.amount,95,100));
+            profitInsurancePool((mulDiv(user.amount,5,100))*oldTokenPrice);
         }else{
             //loss
-            uint256 lossMoney = user.amount*1*(oldTokenPrice-newTokenPrice);
-            outUniswap(user.name,tokenType,user.amount*1);
-            var result = 
-            lossInsurancePool(user.name,user.amount*1*oldTokenPrice,lossMoney);
+            uint256 lossMoney = mulDiv(user.amount,95,100)*(oldTokenPrice-newTokenPrice);
+            outUniswap(user.name,tokenType,mulDiv(user.amount,95,100));
+            lossInsurancePool(user.name,mulDiv(user.amount,5,100)*oldTokenPrice,lossMoney);
         }
         //Update ledger
         pool.tokenAmount -= user.amount;
@@ -218,6 +217,17 @@ contract DefendMoney {
             }
             outAAVE(name,compensation);
         }
+    }
+
+    function mulDiv (uint x, uint y, uint z) public pure returns (uint) {
+        return ABDKMathQuad.toUInt (ABDKMathQuad.div (
+                ABDKMathQuad.mul (
+                ABDKMathQuad.fromUInt (x),
+                ABDKMathQuad.fromUInt (y)
+                ),
+                ABDKMathQuad.fromUInt (z)
+            )
+        );
     }
 
 }
