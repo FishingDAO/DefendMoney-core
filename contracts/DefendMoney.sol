@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.7.0;
 import "./ABDKMathQuad.sol";
-//import './Uniswap.sol';
+import './UniswapUtils.sol';
 
 contract DefendMoney {
     //User Structure
@@ -26,7 +26,8 @@ contract DefendMoney {
     }
 
     //TODO define TokenID protocol
-
+    mapping(uint=>address) public tokenIDProtocol;
+    
     // Token total
     uint256 public tokenTotal;
 
@@ -115,6 +116,12 @@ contract DefendMoney {
         //TODO add liquid
     }
 
+    //out uniswap,assets to users
+    function outUniswap(address name,uint256 tokenType,uint256 amount) internal {
+        //TODO Take out the asset and return it to the user
+
+    }
+    
     //entry AAVE
     function entryAAVE(uint256 amount) internal{
         //TODO add liquid
@@ -126,11 +133,6 @@ contract DefendMoney {
 
     }
 
-    //out uniswap,assets to users
-    function outUniswap(address name,uint256 tokenType,uint256 amount) internal {
-        //TODO Take out the asset and return it to the user
-
-    }
 
     // Eet Token price
     function getTokenPrice(uint256 tokenType) 
@@ -145,10 +147,9 @@ contract DefendMoney {
     // Swap Dai from uniswap
     function swapDai(uint256 tokenType, uint256 amount)
         public
-        returns (uint256)
+        returns (uint)
     {
-        //TODO swap Dai from uniswap
-        return 10;
+        return tokenToDai(tokenIDProtocol[tokenType],address);
     }
 
     //Withdraw asset
