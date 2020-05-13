@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 <0.7.0;
 import "./ABDKMathQuad.sol";
-import './Uniswap.sol';
+//import './Uniswap.sol';
 
 contract DefendMoney {
     //User Structure
@@ -122,6 +122,12 @@ contract DefendMoney {
 
     //out AAVE,assets to users
     function outAAVE(address name,uint256 amount) internal {
+        //TODO Take out the asset and return it to the user
+
+    }
+
+    //out uniswap,assets to users
+    function outUniswap(address name,uint256 tokenType,uint256 amount) internal {
         //TODO Take out the asset and return it to the user
 
     }
