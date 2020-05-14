@@ -37,6 +37,9 @@ contract DefendMoney {
     // Insurance Pool
     InsurePool public insurePool;
 
+    //TODO Contract address
+    address public ContractAddress;
+
     //
     constructor() public {
         tokenTotal = 6;
@@ -48,6 +51,7 @@ contract DefendMoney {
             });
         }
         insurePool = InsurePool({depositAmount: 0, surplusFundAmount: 0});
+        ContractAddress = msg.sender;
     }
 
     // Input Asset
