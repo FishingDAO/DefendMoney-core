@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 /**
- * The interface of UniswapFactory
+ * @title The interface of UniswapFactory
  */
 interface IUniswapFactory {
     // Create Exchange
@@ -13,7 +13,7 @@ interface IUniswapFactory {
     function initializeFactory(address template) external;
 }
 /**
- * The interface of UniswapExchange
+ * @title The interface of UniswapExchange
  */
 interface IUniswapExchange {
     // Address of ERC20 token sold on this exchange

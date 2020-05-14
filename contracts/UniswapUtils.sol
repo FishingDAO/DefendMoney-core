@@ -3,58 +3,118 @@ pragma solidity ^0.6.0;
 import "./UniswapInterface.sol";
 import "./IERC20.sol";
 
+
 /**
- * The Utils of Uniswap
- *
- * @auther Tao
+ * @title The Utils of Uniswap
+ * @author Tao
  */
-contract UniswapUtils{
+contract UniswapUtils {
     // ropsten testnet
-    address constant UniswapFactoryAddress= 0x9c83dCE8CA20E9aAF9D3efc003b2ea62aBC08351;
+    address public constant UNISWAP_FACTORY_ADDRESS = 0x9c83dCE8CA20E9aAF9D3efc003b2ea62aBC08351;
 
     // DAI address
-    address constant DaiAddress = 0x2448eE2641d78CC42D7AD76498917359D961A783;
+    address public constant DAI_ADDRESS = 0x2448eE2641d78CC42D7AD76498917359D961A783;
 
-    // Get UniswapExchange
-    function getUniswapExchange(address tokenAddress) public view returns(address){
-        return IUniswapFactory(UniswapFactoryAddress).getExchange(tokenAddress);
-    }
-    
-    // ETH=>DAI
-    function ethToDai(uint ethAmount)
-        public returns (uint) {
-        return ethToDai(ethAmount, uint(1));
-    }
-
-    // ETH=>DAI
-    function ethToDai( uint ethAmount, uint minTokenAmount)
-        public returns (uint) {
-        return IUniswapExchange(getUniswapExchange(DaiAddress))
-            .ethToTokenSwapInput.value(ethAmount)(minTokenAmount, uint(now + 60));
-    }
-    
-    // token=>ETH
-    function tokenToEth(address tokenAddress, uint tokenAmount) public returns (uint) {
-        return tokenToEth(tokenAddress, tokenAmount, uint(1));
+    /**
+     * @dev Get UniswapExchange
+     * @param _tokenAddress the address token contract
+     * @return the address of UniswapExchange
+     */ 
+    function getUniswapExchange(address _tokenAddress)
+        public
+        view
+        returns (address)
+    {
+        return
+            IUniswapFactory(UNISWAP_FACTORY_ADDRESS).getExchange(_tokenAddress);
     }
 
-    // token=>ETH
-    function tokenToEth(address tokenAddress, uint tokenAmount, uint minEthAmount) internal returns (uint) {
-        address exchange = getUniswapExchange(tokenAddress);
-        IERC20(tokenAddress).approve(exchange, tokenAmount);
-        return IUniswapExchange(exchange)
-            .tokenToEthSwapInput(tokenAmount, minEthAmount, uint(now + 60));
-    }    
-    
-    // token=>DAI
-    function tokenToDai(address tokenAddress,  uint tokenAmount) public returns (uint) {
-        return tokenToDai(tokenAddress, tokenAmount, uint(1));
+    /**
+     * @dev ETH=>DAI
+     * @param _ethAmount amount of ETH sold
+     * @return Amount of DAI bought
+     */
+    function ethToDai(uint256 _ethAmount) public returns (uint256) {
+        return ethToDai(ethAmount, uint256(1));
     }
-    
-    // token=>DAI
-    function tokenToDai(address tokenAddress, uint tokenInAmount, uint minTokenOut) public returns (uint) {
-        uint ethAmount = tokenToEth(tokenAddress, tokenInAmount);
-        return ethToDai( ethAmount, minTokenOut);
+
+    /**
+     * @dev ETH=>DAI
+     * @param _ethAmount amount of ETH sold
+     * @param _minTokenAmount minimum DAI bought
+     * @return Amount of DAI bought
+     */
+    function ethToDai(uint256 _ethAmount, uint256 _minTokenAmount)
+        public
+        returns (uint256)
+    {
+        return
+            IUniswapExchange(getUniswapExchange(DAI_ADDRESS))
+                .ethToTokenSwapInput
+                .value(_ethAmount)(_minTokenAmount, uint256(now + 60));
     }
-    
+
+    /**
+     * @dev token=>ETH
+     * @param _tokenAddress the address of Token contract
+     * @param _tokenAmount amount of ERC20 tokens sold
+     * @param return amount of ETH bought
+     */ 
+    function tokenToEth(address _tokenAddress, uint256 _tokenAmount)
+        public
+        returns (uint256)
+    {
+        return tokenToEth(_tokenAddress, _tokenAmount, uint256(1));
+    }
+
+    /**
+     * @dev token=>ETH
+     * @param _tokenAddress the address of Token contract
+     * @param _tokenAmount amount of ERC20 tokens sold
+     * @param _minEthAmount minimum ETH bought
+     * @param return amount of ETH bought
+     */ 
+    function tokenToEth(
+        address _tokenAddress,
+        uint256 _tokenAmount,
+        uint256 _minEthAmount
+    ) internal returns (uint256) {
+        address exchange = getUniswapExchange(_tokenAddress);
+        IERC20(_tokenAddress).approve(exchange, _tokenAmount);
+        return
+            IUniswapExchange(exchange).tokenToEthSwapInput(
+                _tokenAmount,
+                _minEthAmount,
+                uint256(now + 60)
+            );
+    }
+
+    /**
+     * @dev token=>DAI
+     * @param _tokenAddress the address of Token contract
+     * @param _tokenAmount amount of DAI sold
+     * @param return amount of DAI bought
+     */ 
+    function tokenToDai(address _tokenAddress, uint256 _tokenAmount)
+        public
+        returns (uint256)
+    {
+        return tokenToDai(_tokenAddress, _tokenAmount, uint256(1));
+    }
+
+    /**
+     * @dev token=>DAI
+     * @param _tokenAddress the address of Token contract
+     * @param _tokenAmount amount of ERC20 tokens sold
+     * @param _minTokenOut minimum ETH bought
+     * @param return amount of DAI bought
+     */ 
+    function tokenToDai(
+        address _tokenAddress,
+        uint256 _tokenAmount,
+        uint256 _minTokenOut
+    ) public returns (uint256) {
+        uint256 ethAmount = tokenToEth(_tokenAddress, _tokenAmount);
+        return ethToDai(_ethAmount, _minTokenOut);
+    }
 }
