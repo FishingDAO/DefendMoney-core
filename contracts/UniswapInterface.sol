@@ -1,5 +1,7 @@
 pragma solidity ^0.6.0;
-
+/**
+ * The interface of UniswapFactory
+ */
 interface IUniswapFactory {
     // Create Exchange
     function createExchange(address token) external returns (address exchange);
@@ -10,7 +12,9 @@ interface IUniswapFactory {
     // Never use
     function initializeFactory(address template) external;
 }
-
+/**
+ * The interface of UniswapExchange
+ */
 interface IUniswapExchange {
     // Address of ERC20 token sold on this exchange
     function tokenAddress() external view returns (address token);
