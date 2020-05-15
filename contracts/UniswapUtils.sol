@@ -35,7 +35,7 @@ contract UniswapUtils {
      * @return Amount of DAI bought
      */
     function ethToDai(uint256 _ethAmount) public returns (uint256) {
-        return ethToDai(ethAmount, uint256(1));
+        return ethToDai(_ethAmount, uint256(1));
     }
 
     /**
@@ -58,7 +58,7 @@ contract UniswapUtils {
      * @dev token=>ETH
      * @param _tokenAddress the address of Token contract
      * @param _tokenAmount amount of ERC20 tokens sold
-     * @param return amount of ETH bought
+     * @return amount of ETH bought
      */ 
     function tokenToEth(address _tokenAddress, uint256 _tokenAmount)
         public
@@ -72,7 +72,7 @@ contract UniswapUtils {
      * @param _tokenAddress the address of Token contract
      * @param _tokenAmount amount of ERC20 tokens sold
      * @param _minEthAmount minimum ETH bought
-     * @param return amount of ETH bought
+     * @return amount of ETH bought
      */ 
     function tokenToEth(
         address _tokenAddress,
@@ -93,7 +93,7 @@ contract UniswapUtils {
      * @dev token=>DAI
      * @param _tokenAddress the address of Token contract
      * @param _tokenAmount amount of DAI sold
-     * @param return amount of DAI bought
+     * @return amount of DAI bought
      */ 
     function tokenToDai(address _tokenAddress, uint256 _tokenAmount)
         public
@@ -107,7 +107,7 @@ contract UniswapUtils {
      * @param _tokenAddress the address of Token contract
      * @param _tokenAmount amount of ERC20 tokens sold
      * @param _minTokenOut minimum ETH bought
-     * @param return amount of DAI bought
+     * @return amount of DAI bought
      */ 
     function tokenToDai(
         address _tokenAddress,
@@ -115,6 +115,6 @@ contract UniswapUtils {
         uint256 _minTokenOut
     ) public returns (uint256) {
         uint256 ethAmount = tokenToEth(_tokenAddress, _tokenAmount);
-        return ethToDai(_ethAmount, _minTokenOut);
+        return ethToDai(ethAmount, _minTokenOut);
     }
 }
