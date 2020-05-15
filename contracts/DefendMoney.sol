@@ -1,6 +1,7 @@
 pragma solidity >=0.5.0 <0.7.0;
 import "./ABDKMathQuad.sol";
 import './UniswapUtils.sol';
+import './AaveUtils.sol';
 
 contract DefendMoney {
     //User Structure
@@ -25,7 +26,7 @@ contract DefendMoney {
         uint256 surplusFundAmount;
     }
 
-    //TODO define TokenID protocol
+    //TokenID protocol
     mapping(uint=>address) public tokenIDProtocol;
     
     // Token total
@@ -37,7 +38,6 @@ contract DefendMoney {
     // Insurance Pool
     InsurePool public insurePool;
 
-    //
     constructor() public {
         tokenTotal = 6;
         for (uint256 i = 0; i < tokenTotal; i++) {
@@ -97,7 +97,7 @@ contract DefendMoney {
         user.price = getTokenPrice(tokenType);
         // distribute Token
         entryInsurancePool(swapDai(tokenType, mulDiv(amount,5,100)));
-        entryUniSwap(tokenType,mulDiv(amount,95,100));
+        entryAAVE(tokenType,mulDiv(amount,95,100));
     }
 
 
@@ -106,21 +106,9 @@ contract DefendMoney {
         internal 
     {
         insurePool.depositAmount += amount;
-        entryUniSwap(100+7,amount);
+        entryAAVE(100+7,amount);
     }
 
-    //Entry Uniswap
-    function entryUniSwap(uint256 tokenType, uint256 amount) 
-        internal 
-    {
-        //TODO add liquid
-    }
-
-    //out uniswap,assets to users
-    function outUniswap(address name,uint256 tokenType,uint256 amount) internal {
-        //TODO Take out the asset and return it to the user
-
-    }
     
     //entry AAVE
     function entryAAVE(uint256 amount) internal{
@@ -134,7 +122,7 @@ contract DefendMoney {
     }
 
 
-    // Eet Token price
+    // Get Token price
     function getTokenPrice(uint256 tokenType) 
         public 
         returns (uint256) 
