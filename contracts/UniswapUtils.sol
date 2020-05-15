@@ -13,7 +13,8 @@ contract UniswapUtils {
     address public constant UNISWAP_FACTORY_ADDRESS = 0x9c83dCE8CA20E9aAF9D3efc003b2ea62aBC08351;
 
     // DAI address
-    address public constant DAI_ADDRESS = 0x2448eE2641d78CC42D7AD76498917359D961A783;
+    address public constant DAI_ADDRESS = 0xaD6D458402F60fD3Bd25163575031ACDce07538D;
+    
 
     /**
      * @dev Get UniswapExchange
