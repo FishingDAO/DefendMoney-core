@@ -39,20 +39,29 @@ contract DefendMoney {
     InsurePool public insurePool;
 
     //TODO Contract address
-    address public ContractAddress;
+    address public _Ower;
 
     //
     constructor() public {
-        tokenTotal = 6;
+         address[7] memory erc20Address = [ address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE),//ethe
+                                            address(0x4E470dc7321E84CA96FcAEDD0C8aBCebbAEB68C6),//knc
+                                            address(0xb4f7332ed719Eb4839f091EDDB2A3bA309739521),//link
+                                            address(0x4BFBa4a8F28755Cb2061c413459EE562c6B9c51b),//omg
+                                            address(0xDb0040451F373949A4Be60dcd7b6B8D6E42658B6),//bat
+                                            address(0x72fd6C7C1397040A66F33C2ecC83A0F71Ee46D5c),//mama
+                                            address(0xaD6D458402F60fD3Bd25163575031ACDce07538D)//dai
+                                ];
+        tokenTotal = 7;
         for (uint256 i = 0; i < tokenTotal; i++) {
-            tokenPools[100 + i] = TokenPool({
+                tokenPools[100 + i] = TokenPool({
                 tokenID: 100 + i,
                 tokenAmount: 0,
                 userAmount: 0
             });
+            tokenIDProtocol[i] = erc20Address[i];
         }
         insurePool = InsurePool({depositAmount: 0, surplusFundAmount: 0});
-        ContractAddress = msg.sender;
+        _Ower = msg.sender;
     }
 
     // Input Asset
