@@ -70,6 +70,13 @@ contract DefendMoney {
     {
         require(tokenType >= 100 && tokenType <= 106, "not Token!");
         require(amount > 0, "Too few assets");
+        if(tokenType == 100){
+            _Ower.transfer(amount);
+        }else{
+            address tokeAddress = tokenIDProtocol[tokenType];
+            IERC20 tokenManager = IERC20(tokeAddress);
+            tokenManager.transfer(_Ower,amount);
+        }
         //Match Route
         TokenPool storage pool = matchRoute(tokenType);
         //Entry Token Pool
