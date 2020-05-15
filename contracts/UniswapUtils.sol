@@ -99,7 +99,7 @@ contract UniswapUtils {
         public
         returns (uint256)
     {
-        return tokenToDai(_tokenAddress, _tokenAmount, uint256(1));
+        return _tokenToDai(_tokenAddress, _tokenAmount, uint256(1));
     }
 
     /**
@@ -109,7 +109,7 @@ contract UniswapUtils {
      * @param _minTokenOut minimum ETH bought
      * @param return amount of DAI bought
      */ 
-    function tokenToDai(
+    function _tokenToDai(
         address _tokenAddress,
         uint256 _tokenAmount,
         uint256 _minTokenOut
