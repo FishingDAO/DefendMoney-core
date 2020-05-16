@@ -8,7 +8,7 @@ import "./IERC20.sol";
  * @title The Utils of Uniswap
  * @author Tao
  */
-contract UniswapUtils {
+library UniswapUtils {
     // ropsten testnet
     address public constant UNISWAP_FACTORY_ADDRESS = 0x9c83dCE8CA20E9aAF9D3efc003b2ea62aBC08351;
 

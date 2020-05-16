@@ -1,4 +1,4 @@
-pragma solidity >=0.5.0 <0.7.0;
+pragma solidity 0.6.0;
 import "./ABDKMathQuad.sol";
 import './UniswapUtils.sol';
 import './AaveUtils.sol';
@@ -39,7 +39,7 @@ contract DefendMoney {
     InsurePool public insurePool;
 
     //TODO Contract address
-    address public _Ower;
+    address payable _Ower;
 
     //
     constructor() public {
@@ -66,7 +66,7 @@ contract DefendMoney {
 
     // Input Asset
     function inputAsset(address name, uint256 tokenType, uint256 amount)
-        public
+        public payable
     {
         require(tokenType >= 100 && tokenType <= 106, "not Token!");
         require(amount > 0, "Too few assets");
@@ -77,20 +77,16 @@ contract DefendMoney {
             IERC20 tokenManager = IERC20(tokeAddress);
             tokenManager.transfer(_Ower,amount);
         }
+    }
+
+    function startAccountBook(address name, uint256 tokenType, uint256 amount) 
+        public payable
+    {
+        require(msg.sender == _Ower, "not _Ower");
         //Match Route
         TokenPool storage pool = matchRoute(tokenType);
         //Entry Token Pool
         entryTokenPool(pool, name, tokenType, amount);
-    }
-
-    // Check Token Pool
-    function checkTokenPool(uint256 tokenType)
-        public
-        view
-        returns (uint256)
-    {
-        TokenPool storage pool = tokenPools[tokenType];
-        return pool.tokenAmount;
     }
 
     // Match Route
@@ -115,12 +111,19 @@ contract DefendMoney {
         user.name = name;
         user.tokenID = tokenType;
         user.amount = amount;
-        user.price = getTokenPrice(tokenType);
+        user.price = UniswapUtils.getTokenPrice(tokenIDProtocol[tokenType],amount);
         // distribute Token
         entryInsurancePool(swapDai(tokenType, mulDiv(amount,5,100)));
         entryAAVE(tokenType,mulDiv(amount,95,100));
     }
 
+    // Swap Dai from uniswap
+    function swapDai(uint256 tokenType, uint256 amount)
+        public
+        returns (uint256)
+    {
+        return UniswapUtils.tokenToDai(tokenIDProtocol[tokenType],amount);
+    }
 
     //Entry Insurance Pool
     function entryInsurancePool(uint256 amount) 
@@ -132,40 +135,27 @@ contract DefendMoney {
 
     
     //entry AAVE
-    function entryAAVE(uint256 amount) internal{
+    function entryAAVE(uint256 tokenType,uint256 amount) internal{
         //TODO add liquid
+        //Assets do not flow into AAVE temporarily, which will be realized later
     }
 
     //out AAVE,assets to users
-    function outAAVE(address name,uint256 amount) internal {
+    function outAAVE(address name,uint256 tokenType,uint256 amount) public payable{
         //TODO Take out the asset and return it to the user
-
-    }
-
-
-    // Get Token price
-    function getTokenPrice(uint256 tokenType) 
-        public 
-        returns (uint256) 
-    {
-        uint256 price=10;
-        // TODO get token price from Chainlink
-        return price;
-    }
-
-    // Swap Dai from uniswap
-    function swapDai(uint256 tokenType, uint256 amount)
-        public
-        returns (uint)
-    {
-        return tokenToDai(tokenIDProtocol[tokenType],address);
+        if(msg.sender == _Ower){
+            address tokeAddress = tokenIDProtocol[tokenType];
+            IERC20 tokenManager = IERC20(tokeAddress);
+            tokenManager.transfer(name,amount);
+            //Assets do not flow into AAVE temporarily, which will be realized later
+        }
     }
 
     //Withdraw asset
     function withdrawAssets(address name,uint256 tokenType) 
         public
     {
-        require(tokenType >= 100 && tokenType <= 106, "not Token!");
+        require(tokenType >= 100 && tokenType <= 107, "not Token!");
         //Match Route
         TokenPool storage pool = matchRoute(tokenType);
         //Out Token Pool
@@ -181,16 +171,16 @@ contract DefendMoney {
         //update Token Pool
         User storage user = pool.users[name];
         require(user.amount > 0,"No assets");
-        uint256 newTokenPrice = getTokenPrice(tokenType);
+        uint256 newTokenPrice = UniswapUtils.getTokenPrice(tokenIDProtocol[tokenType],user.amount);
         uint256 oldTokenPrice = user.price;
         if(newTokenPrice >= oldTokenPrice){
             //No loss
-            outUniswap(user.name,tokenType,mulDiv(user.amount,95,100));
+            outAAVE(user.name,tokenType,mulDiv(user.amount,95,100));
             profitInsurancePool((mulDiv(user.amount,5,100))*oldTokenPrice);
         }else{
             //loss
             uint256 lossMoney = mulDiv(user.amount,95,100)*(oldTokenPrice-newTokenPrice);
-            outUniswap(user.name,tokenType,mulDiv(user.amount,95,100));
+            outAAVE(user.name,tokenType,mulDiv(user.amount,95,100));
             lossInsurancePool(user.name,mulDiv(user.amount,5,100)*oldTokenPrice,lossMoney);
         }
         //Update ledger
@@ -216,7 +206,7 @@ contract DefendMoney {
         if(deposit>=loss){
             uint256 surplusFund = deposit-loss;
             insurePool.depositAmount -= deposit;
-            outAAVE(name,loss);
+            outAAVE(name,100+6,loss);
             require(surplusFund>0);
             insurePool.surplusFundAmount += surplusFund;
         }else{
@@ -231,9 +221,20 @@ contract DefendMoney {
                     insurePool.surplusFundAmount += (compensation-loss);
                 }
             }
-            outAAVE(name,compensation);
+            outAAVE(name,100+6,compensation);
         }
     }
+
+     // Check Token Pool
+    function checkTokenPool(uint256 tokenType)
+        public
+        view
+        returns (uint256)
+    {
+        TokenPool storage pool = tokenPools[tokenType];
+        return pool.tokenAmount;
+    }
+
 
     function mulDiv (uint x, uint y, uint z) public pure returns (uint) {
         return ABDKMathQuad.toUInt (ABDKMathQuad.div (

@@ -1,4 +1,4 @@
-pragma solidity 0.6.5;
+pragma solidity 0.6.0;
 
 import "./AaveInterface.sol";
 import "./IERC20.sol";
@@ -19,7 +19,7 @@ contract AaveUtils {
     // Aave lending pool core address
     address public constant AAVE_LENDING_POOL_CORE = 0x3dfd23A6c5E8BbcFc9581d2E864a68feb6a076d3;
     // Adai address address
-    a8ddress public constant ADAI_ADDRESS= 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    address public constant ADAI_ADDRESS= 0x6B175474E89094C44Da98b954EedeAC495271d0F;
     /**
      * @dev deposit
      * @param _user the address of user
