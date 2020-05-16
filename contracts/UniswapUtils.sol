@@ -49,11 +49,11 @@ contract UniswapUtils {
         public
         returns (uint256)
     {
-        return
-            IUniswapExchange(getUniswapExchange(DAI_ADDRESS))
-                .ethToTokenSwapInput
-                .value(_ethAmount)(_minTokenAmount, uint256(now + 60));
+        IUniswapExchange uniswapExchange=IUniswapExchange(getUniswapExchange(DAI_ADDRESS));
+        return uniswapExchange.ethToTokenSwapInput.value(_ethAmount)(_minTokenAmount, uint256(now + 60));
     }
+    
+
 
     /**
      * @dev token=>ETH
@@ -100,7 +100,7 @@ contract UniswapUtils {
         public
         returns (uint256)
     {
-        return _tokenToDai(_tokenAddress, _tokenAmount, uint256(1));
+        return tokenToDai(_tokenAddress, _tokenAmount, uint256(1));
     }
 
     /**
@@ -110,12 +110,39 @@ contract UniswapUtils {
      * @param _minTokenOut minimum ETH bought
      * @return amount of DAI bought
      */ 
-    function _tokenToDai(
+    function tokenToDai(
         address _tokenAddress,
         uint256 _tokenAmount,
         uint256 _minTokenOut
     ) public returns (uint256) {
         uint256 ethAmount = tokenToEth(_tokenAddress, _tokenAmount);
         return ethToDai(ethAmount, _minTokenOut);
+    }
+
+
+    /**
+     *@dev get ETH price
+     *@param _ethAmount amount of ETH
+     *@return the price(DAI) of ETH
+     */
+    function getEthPrice(uint256 _ethAmount) 
+        public 
+        view
+        returns(uint256){
+        IUniswapExchange uniswapExchange=IUniswapExchange(getUniswapExchange(DAI_ADDRESS));
+        return uniswapExchange.getEthToTokenInputPrice(_ethAmount);
+    }
+    /**
+     *@dev get Token price
+     *@param _tokenAmount amount of token
+     *@return the price(DAI) of token
+     */
+    function getTokenPrice(address _tokenAddress,uint256 _tokenAmount)
+        public
+        view
+        returns(uint256) {
+        IUniswapExchange uniswapExchange=IUniswapExchange(getUniswapExchange(_tokenAddress));
+        uint256 ethAmount=uniswapExchange.getTokenToEthInputPrice(_tokenAmount);
+        return getEthPrice(ethAmount);
     }
 }
