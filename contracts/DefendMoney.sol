@@ -89,6 +89,14 @@ contract DefendMoney {
         entryTokenPool(pool, name, tokenType, amount);
     }
 
+    function testPrice(uint256 tokenType,uint256 amount) public returns(uint256){
+        return UniswapUtils.getTokenPrice(tokenIDProtocol[tokenType],amount);
+    }
+    
+    function testSwap(uint256 tokenType,uint256 amount) public returns(uint256){
+        return swapDai(tokenType,amount);
+    }
+
     // Match Route
     function matchRoute(uint256 tokenType) 
         internal 
