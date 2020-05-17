@@ -1,7 +1,8 @@
 pragma solidity 0.6.0;
 import "./ABDKMathQuad.sol";
 import './UniswapUtils.sol';
-import './AaveUtils.sol';
+import "testKyberSwap.sol";
+import "ERC20Interface.sol";
 
 contract DefendMoney {
     //User Structure
@@ -40,7 +41,11 @@ contract DefendMoney {
 
     //TODO Contract address
     address payable _Ower;
-
+    
+    //Test use
+    address constant KyberNetworkProxyAddress = 0x818E6FECD516Ecc3849DAf6845e3EC868087B755;
+    KyberNetworkProxy public kyberManger;
+    
     //
     constructor() public {
          address[7] memory erc20Address = [ address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE),//ethe
@@ -62,6 +67,7 @@ contract DefendMoney {
         }
         insurePool = InsurePool({depositAmount: 0, surplusFundAmount: 0});
         _Ower = msg.sender;
+        kyberManger = KyberNetworkProxy(KyberNetworkProxyAddress);
     }
 
     // Input Asset
@@ -89,14 +95,6 @@ contract DefendMoney {
         entryTokenPool(pool, name, tokenType, amount);
     }
 
-    function testPrice(uint256 tokenType,uint256 amount) public returns(uint256){
-        return UniswapUtils.getTokenPrice(tokenIDProtocol[tokenType],amount);
-    }
-    
-    function testSwap(uint256 tokenType,uint256 amount) public returns(uint256){
-        return swapDai(tokenType,amount);
-    }
-
     // Match Route
     function matchRoute(uint256 tokenType) 
         internal 
@@ -120,9 +118,24 @@ contract DefendMoney {
         user.tokenID = tokenType;
         user.amount = amount;
         user.price = UniswapUtils.getTokenPrice(tokenIDProtocol[tokenType],amount);
-        // distribute Token
+        //distribute Token
         entryInsurancePool(swapDai(tokenType, mulDiv(amount,5,100)));
         entryAAVE(tokenType,mulDiv(amount,95,100));
+    }
+    
+    
+    function testUniswapPrice(uint256 tokenType,uint256 amount) public  returns(uint256){
+        return UniswapUtils.getTokenPrice(tokenIDProtocol[tokenType],amount);
+    }
+    
+    function testUniswapSwap(uint256 tokenType,uint256 amount) public returns(uint256){
+        return swapDai(tokenType,amount);
+    }
+    
+    function testKyberPrice(uint256 srcTokenType,uint256 desTokenType,uint256 amount) public view returns(uint,uint){
+        ERC20 srcToken = ERC20(tokenIDProtocol[srcTokenType]);
+        ERC20 desToken = ERC20(tokenIDProtocol[desTokenType]);
+        return kyberManger.getExpectedRate(srcToken,desToken,amount);
     }
 
     // Swap Dai from uniswap
@@ -241,6 +254,16 @@ contract DefendMoney {
     {
         TokenPool storage pool = tokenPools[tokenType];
         return pool.tokenAmount;
+    }
+    
+    function checkTokenPoolForUser(address name,uint256 tokenType)
+        public
+        view
+        returns(uint256)
+    {
+        TokenPool storage pool = tokenPools[tokenType];
+         User storage user = pool.users[name];
+         return user.amount;
     }
 
 
