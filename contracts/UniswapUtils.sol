@@ -11,7 +11,6 @@ import "./IERC20.sol";
 library UniswapUtils {
     // ropsten testnet
     address public constant UNISWAP_FACTORY_ADDRESS = 0x9c83dCE8CA20E9aAF9D3efc003b2ea62aBC08351;
-
     // DAI address
     address public constant DAI_ADDRESS = 0xaD6D458402F60fD3Bd25163575031ACDce07538D;
     
@@ -35,7 +34,10 @@ library UniswapUtils {
      * @param _ethAmount amount of ETH sold
      * @return Amount of DAI bought
      */
-    function ethToDai(uint256 _ethAmount) public returns (uint256) {
+    function ethToDai(uint256 _ethAmount) 
+        public 
+        returns (uint256) 
+    {
         return ethToDai(_ethAmount, uint256(1));
     }
 
@@ -114,7 +116,8 @@ library UniswapUtils {
         address _tokenAddress,
         uint256 _tokenAmount,
         uint256 _minTokenOut
-    ) public returns (uint256) {
+    ) public returns (uint256) 
+    {
         uint256 ethAmount = tokenToEth(_tokenAddress, _tokenAmount);
         return ethToDai(ethAmount, _minTokenOut);
     }
@@ -128,10 +131,13 @@ library UniswapUtils {
     function getEthPrice(uint256 _ethAmount) 
         public 
         view
-        returns(uint256){
+        returns(uint256)
+    {
         IUniswapExchange uniswapExchange=IUniswapExchange(getUniswapExchange(DAI_ADDRESS));
         return uniswapExchange.getEthToTokenInputPrice(_ethAmount);
     }
+    
+    
     /**
      *@dev get Token price
      *@param _tokenAmount amount of token
@@ -140,9 +146,10 @@ library UniswapUtils {
     function getTokenPrice(address _tokenAddress,uint256 _tokenAmount)
         public
         view
-        returns(uint256) {
+        returns(uint256) 
+    {
         IUniswapExchange uniswapExchange=IUniswapExchange(getUniswapExchange(_tokenAddress));
-        uint256 ethAmount=uniswapExchange.getTokenToEthInputPrice(_tokenAmount);
+        uint256 ethAmount=uniswapExchange.getEthToTokenOutputPrice(_tokenAmount);
         return getEthPrice(ethAmount);
     }
 }
