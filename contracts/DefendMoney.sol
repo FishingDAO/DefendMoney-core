@@ -45,11 +45,12 @@ contract DefendMoney {
     //Test use
     address constant KyberNetworkProxyAddress = 0x818E6FECD516Ecc3849DAf6845e3EC868087B755;
     KyberNetworkProxy public kyberManger;
+    UniswapUtils public uniswapManger;
     
     //
     constructor() public {
          address[7] memory erc20Address = [ address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE),//ethe
-                                            address(0x4E470dc7321E84CA96FcAEDD0C8aBCebbAEB68C6),//knc
+                                            address(0x7B2810576aa1cce68F2B118CeF1F36467c648F92),//knc
                                             address(0xb4f7332ed719Eb4839f091EDDB2A3bA309739521),//link
                                             address(0x4BFBa4a8F28755Cb2061c413459EE562c6B9c51b),//omg
                                             address(0xDb0040451F373949A4Be60dcd7b6B8D6E42658B6),//bat
@@ -68,6 +69,7 @@ contract DefendMoney {
         insurePool = InsurePool({depositAmount: 0, surplusFundAmount: 0});
         _Ower = msg.sender;
         kyberManger = KyberNetworkProxy(KyberNetworkProxyAddress);
+        uniswapManger = UniswapUtils(msg.sender);
     }
 
     // Input Asset
@@ -117,7 +119,7 @@ contract DefendMoney {
         user.name = name;
         user.tokenID = tokenType;
         user.amount = amount;
-        user.price = UniswapUtils.getTokenPrice(tokenIDProtocol[tokenType],amount);
+        user.price = uniswapManger.getPirce(amount,tokenIDProtocol[tokenType]);
         //distribute Token
         entryInsurancePool(swapDai(tokenType, mulDiv(amount,5,100)));
         entryAAVE(tokenType,mulDiv(amount,95,100));
@@ -125,7 +127,7 @@ contract DefendMoney {
     
     
     function testUniswapPrice(uint256 tokenType,uint256 amount) public  returns(uint256){
-        return UniswapUtils.getTokenPrice(tokenIDProtocol[tokenType],amount);
+        return uniswapManger.getPirce(amount,tokenIDProtocol[tokenType]);
     }
     
     function testUniswapSwap(uint256 tokenType,uint256 amount) public returns(uint256){
@@ -143,7 +145,7 @@ contract DefendMoney {
         public
         returns (uint256)
     {
-        return UniswapUtils.tokenToDai(tokenIDProtocol[tokenType],amount);
+        return uniswapManger.swapDai(amount,_Ower,tokenIDProtocol[tokenType]);
     }
 
     //Entry Insurance Pool
@@ -151,7 +153,7 @@ contract DefendMoney {
         internal 
     {
         insurePool.depositAmount += amount;
-        entryAAVE(100+7,amount);
+        entryAAVE(100+6,amount);
     }
 
     
@@ -176,7 +178,7 @@ contract DefendMoney {
     function withdrawAssets(address name,uint256 tokenType) 
         public
     {
-        require(tokenType >= 100 && tokenType <= 107, "not Token!");
+        require(tokenType >= 100 && tokenType <= 106, "not Token!");
         //Match Route
         TokenPool storage pool = matchRoute(tokenType);
         //Out Token Pool
@@ -192,7 +194,7 @@ contract DefendMoney {
         //update Token Pool
         User storage user = pool.users[name];
         require(user.amount > 0,"No assets");
-        uint256 newTokenPrice = UniswapUtils.getTokenPrice(tokenIDProtocol[tokenType],user.amount);
+        uint256 newTokenPrice = uniswapManger.getPirce(user.amount,tokenIDProtocol[tokenType]);
         uint256 oldTokenPrice = user.price;
         if(newTokenPrice >= oldTokenPrice){
             //No loss
