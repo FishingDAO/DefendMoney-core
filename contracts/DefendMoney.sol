@@ -63,7 +63,7 @@ contract DefendMoney {
                 tokenAmount: 0,
                 userAmount: 0
             });
-            tokenIDProtocol[i] = erc20Address[i];
+            tokenIDProtocol[100+i] = erc20Address[i];
         }
         insurePool = InsurePool({depositAmount: 0, surplusFundAmount: 0});
         _Ower = msg.sender;
