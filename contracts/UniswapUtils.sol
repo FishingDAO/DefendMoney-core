@@ -1,6 +1,7 @@
 pragma solidity 0.6.0;
 
-import "./UniswapInterface.sol";
+import "./IUniswapExchange.sol";
+import "./IUniswapFactory.sol";
 import "./IERC20.sol";
 
 
