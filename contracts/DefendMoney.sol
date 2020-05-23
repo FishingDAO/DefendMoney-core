@@ -41,10 +41,9 @@ contract DefendMoney {
 
     //TODO Contract address
     address payable _Ower;
-    
     //
     constructor() public {
-         address[7] memory erc20Address = [ address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE),//ethe
+         address[7] memory erc20Address = [ address(0xbCA556c912754Bc8E7D4Aad20Ad69a1B1444F42d),//weth
                                             address(0x7B2810576aa1cce68F2B118CeF1F36467c648F92),//knc
                                             address(0x20fE562d797A42Dcb3399062AE9546cd06f63280),//link
                                             address(0x4BFBa4a8F28755Cb2061c413459EE562c6B9c51b),//omg
@@ -74,13 +73,9 @@ contract DefendMoney {
     {
         require(tokenType >= 100 && tokenType <= 106, "not Token!");
         require(amount > 0, "Too few assets");
-        if(tokenType == 100){
-            address(this).transfer(amount);
-        }else{
-            address tokeAddress = tokenIDProtocol[tokenType];
-            IERC20 tokenManager = IERC20(tokeAddress);
-            tokenManager.transfer(address(this),amount);
-        }
+        address tokeAddress = tokenIDProtocol[tokenType];
+        IERC20 tokenManager = IERC20(tokeAddress);
+        tokenManager.transfer(address(this),amount);
     }
 
     function startAccountBook(address name, uint256 tokenType, uint256 amount) 
@@ -260,7 +255,6 @@ contract DefendMoney {
     function getGainIncomeBalanceOf() public view returns(uint256){
         return insurePool.surplusFundAmount;
     }
-
 
     function mulDiv (uint x, uint y, uint z) public pure returns (uint) {
         return ABDKMathQuad.toUInt (ABDKMathQuad.div (
