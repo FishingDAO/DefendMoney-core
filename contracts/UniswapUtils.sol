@@ -8,23 +8,13 @@ import "./IERC20.sol";
  * @title The Utils of Uniswap
  * @author Tao
  */
-contract UniswapUtils {
+library UniswapUtils {
     // uiswap factory ropsten testnet address
     address public constant UNISWAP_FACTORY_ADDRESS = 0x9c83dCE8CA20E9aAF9D3efc003b2ea62aBC08351;
     // DAI ropsten testnet address
     address public constant DAI_ADDRESS = 0xaD6D458402F60fD3Bd25163575031ACDce07538D;
     // LINK ropsten testnet address
     address public constant LINK_ADDRESS=0x20fE562d797A42Dcb3399062AE9546cd06f63280;
-    // the address of the owner
-    address payable public owner;
-    
-    constructor() public payable {
-        owner = msg.sender;
-    }
-
-    fallback () external payable {}
-
-    receive () external payable {}
 
     /**
      * @dev Get UniswapExchange
@@ -41,20 +31,6 @@ contract UniswapUtils {
             IUniswapFactory(UNISWAP_FACTORY_ADDRESS).getExchange(_tokenAddress);
     }
     
-    /**
-     * @dev Swap ETH from other token
-     * 
-     * @param token_addr Address of output ERC20 token
-     * @return Amount of Token to owner address
-     */    
-    function ethToToken(address token_addr)
-        public
-        payable
-        returns (uint256)
-    {
-        IUniswapExchange daiExchange=IUniswapExchange(getUniswapExchange(token_addr));
-        return daiExchange.ethToTokenTransferInput.value(msg.value)(1, uint256(now + 600),owner);
-    }
     
     /**
      * @dev Swap Dai from other token

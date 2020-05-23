@@ -1,8 +1,9 @@
 pragma solidity 0.6.0;
 import "./ABDKMathQuad.sol";
 import './UniswapUtils.sol';
-import "testKyberSwap.sol";
-import "ERC20Interface.sol";
+import "./testKyberSwap.sol";
+import "./ERC20Interface.sol";
+
 
 contract DefendMoney {
     //User Structure
@@ -45,13 +46,12 @@ contract DefendMoney {
     //Test use
     address constant KyberNetworkProxyAddress = 0x818E6FECD516Ecc3849DAf6845e3EC868087B755;
     KyberNetworkProxy public kyberManger;
-    UniswapUtils public uniswapManger;
     
     //
     constructor() public {
          address[7] memory erc20Address = [ address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE),//ethe
                                             address(0x7B2810576aa1cce68F2B118CeF1F36467c648F92),//knc
-                                            address(0xb4f7332ed719Eb4839f091EDDB2A3bA309739521),//link
+                                            address(0x20fE562d797A42Dcb3399062AE9546cd06f63280),//link
                                             address(0x4BFBa4a8F28755Cb2061c413459EE562c6B9c51b),//omg
                                             address(0xDb0040451F373949A4Be60dcd7b6B8D6E42658B6),//bat
                                             address(0x72fd6C7C1397040A66F33C2ecC83A0F71Ee46D5c),//mama
@@ -69,9 +69,13 @@ contract DefendMoney {
         insurePool = InsurePool({depositAmount: 0, surplusFundAmount: 0});
         _Ower = msg.sender;
         kyberManger = KyberNetworkProxy(KyberNetworkProxyAddress);
-        uniswapManger = UniswapUtils(msg.sender);
+
     }
 
+    fallback () external payable {}
+
+    receive () external payable {}
+    
     // Input Asset
     function inputAsset(address name, uint256 tokenType, uint256 amount)
         public payable
@@ -119,20 +123,20 @@ contract DefendMoney {
         user.name = name;
         user.tokenID = tokenType;
         user.amount = amount;
-        user.price = uniswapManger.getPirce(amount,tokenIDProtocol[tokenType]);
+        user.price = UniswapUtils.getPirce(amount,tokenIDProtocol[tokenType]);
         //distribute Token
         entryInsurancePool(swapDai(tokenType, mulDiv(amount,5,100)));
         entryAAVE(tokenType,mulDiv(amount,95,100));
     }
     
     
-    function testUniswapPrice(uint256 tokenType,uint256 amount) public  returns(uint256){
-        return uniswapManger.getPirce(amount,tokenIDProtocol[tokenType]);
+    function testUniswapPrice(uint256 tokenType,uint256 amount) public view returns(uint256){
+        return UniswapUtils.getPirce(amount,tokenIDProtocol[tokenType]);
     }
     
-    function testUniswapSwap(uint256 tokenType,uint256 amount) public returns(uint256){
-        return swapDai(tokenType,amount);
-    }
+    // function testUniswapSwap(uint256 tokenType,uuint256 tokens_sold,address _receive,address token_addr) public returns(uint256){
+    //     return swapDai(tokenType,amount);
+    // }
     
     function testKyberPrice(uint256 srcTokenType,uint256 desTokenType,uint256 amount) public view returns(uint,uint){
         ERC20 srcToken = ERC20(tokenIDProtocol[srcTokenType]);
@@ -145,7 +149,7 @@ contract DefendMoney {
         public
         returns (uint256)
     {
-        return uniswapManger.swapDai(amount,_Ower,tokenIDProtocol[tokenType]);
+        return UniswapUtils.swapDai(amount,address(this),tokenIDProtocol[tokenType]);
     }
 
     //Entry Insurance Pool
@@ -194,7 +198,7 @@ contract DefendMoney {
         //update Token Pool
         User storage user = pool.users[name];
         require(user.amount > 0,"No assets");
-        uint256 newTokenPrice = uniswapManger.getPirce(user.amount,tokenIDProtocol[tokenType]);
+        uint256 newTokenPrice = UniswapUtils.getPirce(user.amount,tokenIDProtocol[tokenType]);
         uint256 oldTokenPrice = user.price;
         if(newTokenPrice >= oldTokenPrice){
             //No loss
