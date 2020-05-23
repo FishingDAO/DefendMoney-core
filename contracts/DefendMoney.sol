@@ -1,8 +1,7 @@
 pragma solidity 0.6.0;
 import "./ABDKMathQuad.sol";
 import './UniswapUtils.sol';
-import "./testKyberSwap.sol";
-import "./ERC20Interface.sol";
+import "./IERC20.sol";
 
 
 contract DefendMoney {
@@ -43,10 +42,6 @@ contract DefendMoney {
     //TODO Contract address
     address payable _Ower;
     
-    //Test use
-    address constant KyberNetworkProxyAddress = 0x818E6FECD516Ecc3849DAf6845e3EC868087B755;
-    KyberNetworkProxy public kyberManger;
-    
     //
     constructor() public {
          address[7] memory erc20Address = [ address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE),//ethe
@@ -68,12 +63,9 @@ contract DefendMoney {
         }
         insurePool = InsurePool({depositAmount: 0, surplusFundAmount: 0});
         _Ower = msg.sender;
-        kyberManger = KyberNetworkProxy(KyberNetworkProxyAddress);
-
     }
 
     fallback () external payable {}
-
     receive () external payable {}
     
     // Input Asset
@@ -83,18 +75,17 @@ contract DefendMoney {
         require(tokenType >= 100 && tokenType <= 106, "not Token!");
         require(amount > 0, "Too few assets");
         if(tokenType == 100){
-            _Ower.transfer(amount);
+            address(this).transfer(amount);
         }else{
             address tokeAddress = tokenIDProtocol[tokenType];
             IERC20 tokenManager = IERC20(tokeAddress);
-            tokenManager.transfer(_Ower,amount);
+            tokenManager.transfer(address(this),amount);
         }
     }
 
     function startAccountBook(address name, uint256 tokenType, uint256 amount) 
         public payable
     {
-        require(msg.sender == _Ower, "not _Ower");
         //Match Route
         TokenPool storage pool = matchRoute(tokenType);
         //Entry Token Pool
@@ -129,19 +120,8 @@ contract DefendMoney {
         entryAAVE(tokenType,mulDiv(amount,95,100));
     }
     
-    
-    function testUniswapPrice(uint256 tokenType,uint256 amount) public view returns(uint256){
+    function getUniswapPrice(uint256 tokenType,uint256 amount) public view returns(uint256){
         return UniswapUtils.getPirce(amount,tokenIDProtocol[tokenType]);
-    }
-    
-    // function testUniswapSwap(uint256 tokenType,uuint256 tokens_sold,address _receive,address token_addr) public returns(uint256){
-    //     return swapDai(tokenType,amount);
-    // }
-    
-    function testKyberPrice(uint256 srcTokenType,uint256 desTokenType,uint256 amount) public view returns(uint,uint){
-        ERC20 srcToken = ERC20(tokenIDProtocol[srcTokenType]);
-        ERC20 desToken = ERC20(tokenIDProtocol[desTokenType]);
-        return kyberManger.getExpectedRate(srcToken,desToken,amount);
     }
 
     // Swap Dai from uniswap
@@ -217,7 +197,6 @@ contract DefendMoney {
         user.price = 0;
     }
 
-
     //Profit from settlement of insurance pool
     function profitInsurancePool(uint256 deposit) 
         internal 
@@ -252,8 +231,8 @@ contract DefendMoney {
         }
     }
 
-     // Check Token Pool
-    function checkTokenPool(uint256 tokenType)
+    // Get token pool balance
+    function getTokenPoolBalanceOf(uint256 tokenType)
         public
         view
         returns (uint256)
@@ -262,7 +241,7 @@ contract DefendMoney {
         return pool.tokenAmount;
     }
     
-    function checkTokenPoolForUser(address name,uint256 tokenType)
+    function getTokenPoolUserBalanceOf(address name,uint256 tokenType)
         public
         view
         returns(uint256)
@@ -270,6 +249,16 @@ contract DefendMoney {
         TokenPool storage pool = tokenPools[tokenType];
          User storage user = pool.users[name];
          return user.amount;
+    }
+
+    //Get total balance of insurance pool
+    function getInsurancePoolBalanceOf() public view returns(uint256){
+        return insurePool.depositAmount+insurePool.surplusFundAmount;
+    }
+
+    //Gain revenue
+    function getGainIncomeBalanceOf() public view returns(uint256){
+        return insurePool.surplusFundAmount;
     }
 
 
