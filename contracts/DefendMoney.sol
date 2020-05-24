@@ -1,12 +1,9 @@
 pragma solidity 0.6.0;
 import "./ABDKMathQuad.sol";
-import "./UniswapUtils.sol";
+//import './UniswapUtils.sol';
 import "./IERC20.sol";
+import "./KyberSwapFactory.sol";
 
-/**
- *@title the core of defend.money
- *@author Jack 
- */
 contract DefendMoney {
     //User Structure
     struct User {
@@ -128,31 +125,22 @@ contract DefendMoney {
         user.name = name;
         user.tokenID = tokenType;
         user.amount = amount;
-        user.price = UniswapUtils.getPirce(amount, tokenIDProtocol[tokenType]);
+        user.price = KyberSwapFactory.getPriceOfDAI(ERC20(tokenIDProtocol[tokenType]),amount);
         //distribute Token
         entryInsurancePool(swapDai(tokenType, mulDiv(amount, 5, 100)));
         entryAAVE(tokenType, mulDiv(amount, 95, 100));
     }
-
-    function getUniswapPrice(uint256 tokenType, uint256 amount)
-        public
-        view
-        returns (uint256)
-    {
-        return UniswapUtils.getPirce(amount, tokenIDProtocol[tokenType]);
+    
+    function getUniswapPrice(uint256 tokenType,uint256 amount) public returns(uint256){
+        return  KyberSwapFactory.getPriceOfDAI(ERC20(tokenIDProtocol[tokenType]),amount);
     }
 
     // Swap Dai from uniswap
     function swapDai(uint256 tokenType, uint256 amount)
         public
-        returns (uint256)
+        returns(uint256)
     {
-        return
-            UniswapUtils.swapDai(
-                amount,
-                address(this),
-                tokenIDProtocol[tokenType]
-            );
+        return KyberSwapFactory.execSwapTokenToToken(ERC20(tokenIDProtocol[tokenType]),amount,ERC20(tokenIDProtocol[106]),address(this));
     }
 
     //Entry Insurance Pool
@@ -199,11 +187,8 @@ contract DefendMoney {
     ) internal {
         //update Token Pool
         User storage user = pool.users[name];
-        require(user.amount > 0, "No assets");
-        uint256 newTokenPrice = UniswapUtils.getPirce(
-            user.amount,
-            tokenIDProtocol[tokenType]
-        );
+        require(user.amount > 0,"No assets");
+        uint256 newTokenPrice = KyberSwapFactory.getPriceOfDAI(ERC20(tokenIDProtocol[tokenType]),user.amount);
         uint256 oldTokenPrice = user.price;
         if (newTokenPrice >= oldTokenPrice) {
             //No loss
