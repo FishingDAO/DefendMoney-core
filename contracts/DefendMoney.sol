@@ -90,13 +90,9 @@ contract DefendMoney {
     ) public payable {
         require(tokenType >= 100 && tokenType <= 106, "not Token!");
         require(amount > 0, "Too few assets");
-        if (tokenType == 100) {
-            address(this).transfer(amount);
-        } else {
-            address tokeAddress = tokenIDProtocol[tokenType];
-            IERC20 tokenManager = IERC20(tokeAddress);
-            tokenManager.transfer(address(this), amount);
-        }
+        address tokeAddress = tokenIDProtocol[tokenType];
+        IERC20 tokenManager = IERC20(tokeAddress);
+        tokenManager.transfer(address(this),amount);
     }
 
     function startAccountBook(
@@ -299,20 +295,14 @@ contract DefendMoney {
         return insurePool.surplusFundAmount;
     }
 
-    function mulDiv(
-        uint256 x,
-        uint256 y,
-        uint256 z
-    ) public pure returns (uint256) {
-        return
-            ABDKMathQuad.toUInt(
-                ABDKMathQuad.div(
-                    ABDKMathQuad.mul(
-                        ABDKMathQuad.fromUInt(x),
-                        ABDKMathQuad.fromUInt(y)
-                    ),
-                    ABDKMathQuad.fromUInt(z)
-                )
-            );
+    function mulDiv (uint x, uint y, uint z) public pure returns (uint) {
+        return ABDKMathQuad.toUInt (ABDKMathQuad.div (
+                ABDKMathQuad.mul (
+                ABDKMathQuad.fromUInt (x),
+                ABDKMathQuad.fromUInt (y)
+                ),
+                ABDKMathQuad.fromUInt (z)
+            )
+        );
     }
 }
