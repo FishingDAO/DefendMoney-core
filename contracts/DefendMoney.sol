@@ -42,17 +42,12 @@ contract DefendMoney {
     // Contract address
     address payable _ower;
 
-    // Receive ETH
-    fallback() external payable {}
-
-    receive() external payable {}
-    
     /*
      *@dev Init
      */
     constructor() public {
         address[7] memory erc20Address = [
-            address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE), //ethe
+            address(0xbCA556c912754Bc8E7D4Aad20Ad69a1B1444F42d), //weth
             address(0x7B2810576aa1cce68F2B118CeF1F36467c648F92), //knc
             address(0x20fE562d797A42Dcb3399062AE9546cd06f63280), //link
             address(0x4BFBa4a8F28755Cb2061c413459EE562c6B9c51b), //omg
@@ -72,24 +67,10 @@ contract DefendMoney {
         insurePool = InsurePool({depositAmount: 0, surplusFundAmount: 0});
         _ower = msg.sender;
     }
-    /**
-     *@dev Input Asset
-     *
-     *@param name 
-     *@param tokenType
-     *@param amount
-     *@return 
-     */
-    function inputAsset(
-        address name,
-        uint256 tokenType,
-        uint256 amount
-    ) public payable {
-        require(tokenType >= 100 && tokenType <= 106, "not Token!");
-        require(amount > 0, "Too few assets");
-        address tokeAddress = tokenIDProtocol[tokenType];
-        IERC20 tokenManager = IERC20(tokeAddress);
-        tokenManager.transfer(address(this),amount);
+    
+    
+    function swapEthToWeth(address destAddress) public payable {
+        KyberSwapFactory.execSwapEthToToken(ERC20(tokenIDProtocol[100]),destAddress);
     }
 
     function startAccountBook(
@@ -251,19 +232,13 @@ contract DefendMoney {
     }
 
     // Get token pool balance
-    function getTokenPoolBalanceOf(uint256 tokenType)
-        public
-        view
-        returns (uint256)
+    function getTokenPoolBalanceOf(uint256 tokenType) public view returns (uint256)
     {
         TokenPool storage pool = tokenPools[tokenType];
         return pool.tokenAmount;
     }
 
-    function getTokenPoolUserBalanceOf(address name, uint256 tokenType)
-        public
-        view
-        returns (uint256)
+    function getTokenPoolUserBalanceOf(address name, uint256 tokenType) public view returns (uint256)
     {
         TokenPool storage pool = tokenPools[tokenType];
         User storage user = pool.users[name];
@@ -279,6 +254,10 @@ contract DefendMoney {
     function getGainIncomeBalanceOf() public view returns (uint256) {
         return insurePool.surplusFundAmount;
     }
+    
+        // Receive ETH
+    fallback() external payable {}
+    receive() external payable {}
 
     function mulDiv (uint x, uint y, uint z) public pure returns (uint) {
         return ABDKMathQuad.toUInt (ABDKMathQuad.div (
