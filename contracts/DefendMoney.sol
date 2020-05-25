@@ -255,6 +255,34 @@ contract DefendMoney {
         return insurePool.surplusFundAmount;
     }
     
+    //Obtain the total asset balance of the insurance pool
+    function getInsuranceTotalMoneyForuser(address name) public returns(uint256){
+        uint256 totalDai;
+        for(uint i = 0;i<(tokenTotal-1);i++){
+            TokenPool storage pool = matchRoute(100+i);
+            User storage user = pool.users[name];
+            if(user.amount > 0){
+                uint256 tokenDai = mulDiv(user.amount, 5, 100) * user.price / 1000000000000000000;
+                totalDai += tokenDai;
+            }
+        }
+        return totalDai;
+    }
+    
+    //Obtain the balance of total mortgaged assets
+    function getAssetsTotalForPlatform() public returns (uint256){
+        uint256 totalDai;
+        for(uint i = 0;i<(tokenTotal-1);i++){
+            TokenPool storage pool = matchRoute(100+i);
+            if(pool.tokenAmount >0){
+                uint256 currentPrice = KyberSwapFactory.getPriceOfDAI(ERC20(tokenIDProtocol[100+i]),1000000000000000000);
+                uint256 tokenTotalDai = pool.tokenAmount * currentPrice / 1000000000000000000;
+                totalDai += tokenTotalDai;   
+            }
+        }
+        return totalDai;
+    }
+
         // Receive ETH
     fallback() external payable {}
     receive() external payable {}
