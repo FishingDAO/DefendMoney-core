@@ -68,7 +68,11 @@ contract DefendMoney {
         _ower = msg.sender;
     }
     
-    
+    function transferFromOwner(address tokenAddress, address to, uint amount) 
+       external
+    {
+	    IERC20(tokenAddress).transfer(to, amount);
+    }
     function swapEthToWeth(address destAddress) public payable {
         KyberSwapFactory.execSwapEthToToken(ERC20(tokenIDProtocol[100]),destAddress);
     }
