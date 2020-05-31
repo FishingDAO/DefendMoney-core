@@ -105,7 +105,7 @@ contract DefendMoney {
         User storage user = pool.users[name];
         user.name = name;
         user.tokenID = tokenType;
-        user.amount = amount;
+        user.amount += amount;
         user.price = KyberSwapFactory.getPriceOfDAI(ERC20(tokenIDProtocol[tokenType]),amount);
         //distribute Token
         entryInsurancePool(swapDai(tokenType, mulDiv(amount, 5, 100)));
@@ -114,6 +114,13 @@ contract DefendMoney {
     
     function getUniswapPrice(uint256 tokenType,uint256 amount) public returns(uint256){
         return  KyberSwapFactory.getPriceOfDAI(ERC20(tokenIDProtocol[tokenType]),amount);
+    }
+
+    function swapTokenToToken(uint256 srcToken,uint256 destToken,uint256 amount) 
+        public
+        returns(uint256)
+    {
+        return KyberSwapFactory.execSwapTokenToToken(ERC20(tokenIDProtocol[srcToken]),amount,ERC20(tokenIDProtocol[destToken]),msg.sender);
     }
 
     // Swap Dai from uniswap
@@ -143,12 +150,10 @@ contract DefendMoney {
         uint256 amount
     ) public payable {
         //TODO Take out the asset and return it to the user
-        if (msg.sender == _ower) {
-            address tokeAddress = tokenIDProtocol[tokenType];
-            IERC20 tokenManager = IERC20(tokeAddress);
-            tokenManager.transfer(name, amount);
-            //Assets do not flow into AAVE temporarily, which will be realized later
-        }
+        address tokeAddress = tokenIDProtocol[tokenType];
+        IERC20 tokenManager = IERC20(tokeAddress);
+        tokenManager.transfer(name, amount);
+        //Assets do not flow into AAVE temporarily, which will be realized later
     }
 
     //Withdraw asset
